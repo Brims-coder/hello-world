@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TRON AI v2.0 | @/lovelivelife1992</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #00ff00;
+            --secondary: #00ffff;
+            --accent: #ff00ff;
+            --error: #ff5555;
+            --warning: #ffff00;
+            --bg: #000000;
+            --bg-secondary: #0a0a0a;
+            --terminal-bg: #001100;
+            --cursor-color: #00ff00;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--primary);
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* ===== ТЕРМИНАЛ ===== */
+        #tron-terminal {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: var(--bg);
+            position: relative;
+        }
+
+        /* ШАПКА */
+        .terminal-header {
+            padding: 12px 15px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .tron-logo {
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+            letter-spacing: 1px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .header-btn:hover {
+            background: var(--primary);
+            color: var(--bg);
+        }
+
+        /* ОСНОВНОЕ ОКНО */
+        .terminal-body {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background: var(--terminal-bg);
+            position: relative;
+        }
+
+        #output {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 10px;
+            scroll-behavior: smooth;
+        }
+
+        #output::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #output::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        #output::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* СТРОКА ВВОДА */
+        .input-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .prompt {
+            color: var(--accent);
+            font-weight: bold;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        #command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            caret-color: var(--cursor-color);
+        }
+
+        #send-btn {
+            background: var(--primary);
+            color: var(--bg);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        #send-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* СТИЛИ СООБЩЕНИЙ */
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background: rgba(0, 255, 0, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+
+        .tron-message {
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 3px solid var(--secondary);
+        }
+
+        .system-message {
+            background: rgba(255, 0, 255, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+
+        .error-message {
+            background: rgba(255, 85, 85, 0.1);
+            border-left: 3px solid var(--error);
+            color: var(--error);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .message-content {
+            line-height: 1.6;
+        }
+
+        .message-content pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 5px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .message-content code {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: inherit;
+        }
+
+        /* СИСТЕМА АУТЕНТИФИКАЦИИ */
+        #auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .auth-container {
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+
+        .auth-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary);
+            font-size: 24px;
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: var(--bg);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-family: inherit;
+            font-size: 16px;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .auth-input:focus {
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: var(--bg);
+            border: none;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.4);
+        }
+
+        .auth-error {
+            color: var(--error);
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* ПАНЕЛЬ КОМАНД */
+        .commands-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .cmd-chip {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .cmd-chip:hover {
+            background: var(--primary);
+            color: var(--bg);
+        }
+
+        /* МОБИЛЬНАЯ ОПТИМИЗАЦИЯ */
+        @media (max-width: 768px) {
+            body {
+                font-size: 13px;
+            }
+            
+            .terminal-header {
+                padding: 8px 10px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .header-left {
+                order: 1;
+                width: 100%;
+                justify-content: space-between;
+                margin-bottom: 5px;
+            }
+            
+            .header-right {
+                order: 2;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .tron-logo {
+                font-size: 16px;
+            }
+            
+            .terminal-body {
+                padding: 5px;
+            }
+            
+            .input-line {
+                padding: 8px;
+            }
+            
+            #send-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            
+            .commands-panel {
+                gap: 6px;
+            }
+            
+            .cmd-chip {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 20px;
+            }
+            
+            .auth-title {
+                font-size: 20px;
+            }
+            
+            .message-header {
+                flex-direction: column;
+                gap: 3px;
+            }
+        }
+
+        /* КЛАВИАТУРА НА ЭКРАНЕ */
+        .virtual-keyboard {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--primary);
+            padding: 10px;
+            display: none;
+            z-index: 100;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .keyboard-key {
+            flex: 1;
+            max-width: 50px;
+            height: 40px;
+            background: var(--bg);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-family: inherit;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .keyboard-key:hover {
+            background: var(--primary);
+            color: var(--bg);
+        }
+
+        .show-keyboard {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .show-keyboard {
+                display: block;
+            }
+        }
+
+        /* АНИМАЦИИ */
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .glitch {
+            position: relative;
+            animation: glitch 5s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            2% { transform: translate(-2px, 2px); }
+            4% { transform: translate(-2px, -2px); }
+            6% { transform: translate(2px, 2px); }
+            8% { transform: translate(2px, -2px); }
+            10% { transform: translate(0); }
+        }
+
+        /* УТИЛИТЫ */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .mt-10 {
+            margin-top: 10px;
+        }
+
+        .mb-10 {
+            margin-bottom: 10px;
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        /* ПОДСКАЗКИ */
+        #suggestions {
+            position: absolute;
+            bottom: 60px;
+            left: 10px;
+            right: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            z-index: 50;
+        }
+
+        .suggestion-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- ЭКРАН АУТЕНТИФИКАЦИИ -->
+    <div id="auth-screen">
+        <div class="auth-container">
+            <div class="auth-title">TRON AI v2.0</div>
+            <div class="text-center mb-10" style="color: var(--secondary);">
+                Локальный искусственный интеллект<br>
+                <span style="font-size: 12px;">Сессия: @/lovelivelife1992</span>
+            </div>
+            
+            <input type="password" 
+                   id="auth-password" 
+                   class="auth-input" 
+                   placeholder="Введите мастер-пароль"
+                   autocomplete="off"
+                   autofocus>
+            
+            <button id="auth-login" class="auth-btn">ВХОД В СИСТЕМУ</button>
+            
+            <div class="auth-footer">
+                Система защищена AES-256<br>
+                Все данные хранятся локально
+            </div>
+            
+            <div id="auth-error" class="auth-error"></div>
+        </div>
+    </div>
+
+    <!-- ОСНОВНОЙ ТЕРМИНАЛ -->
+    <div id="tron-terminal" class="hidden">
+        <!-- ШАПКА -->
+        <div class="terminal-header">
+            <div class="header-left">
+                <div class="tron-logo glitch">TRON_AI://ROOT@SYSTEM</div>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span id="status-text">ONLINE</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <button class="header-btn" id="btn-clear">ОЧИСТИТЬ</button>
+                <button class="header-btn" id="btn-help">ПОМОЩЬ</button>
+                <button class="header-btn" id="btn-settings">НАСТРОЙКИ</button>
+                <button class="header-btn" id="btn-logout">ВЫХОД</button>
+            </div>
+        </div>
+
+        <!-- ОСНОВНОЕ ОКНО -->
+        <div class="terminal-body">
+            <!-- ВЫВОД СООБЩЕНИЙ -->
+            <div id="output"></div>
+
+            <!-- ПАНЕЛЬ КОМАНД -->
+            <div class="commands-panel" id="commands-panel">
+                <!-- Команды будут добавлены через JS -->
+            </div>
+
+            <!-- СТРОКА ВВОДА -->
+            <div class="input-line">
+                <div class="prompt">
+                    <span id="current-user">root</span>@tron:<span id="current-dir">~</span>#
+                </div>
+                <input type="text" 
+                       id="command-input" 
+                       placeholder="Введите команду..." 
+                       autocomplete="off"
+                       autofocus>
+                <button id="send-btn">ВВОД</button>
+            </div>
+
+            <!-- ПОДСКАЗКИ -->
+            <div id="suggestions"></div>
+        </div>
+
+        <!-- КНОПКА ВКЛЮЧЕНИЯ КЛАВИАТУРЫ -->
+        <div class="show-keyboard" id="show-keyboard">⌨️</div>
+
+        <!-- ВИРТУАЛЬНАЯ КЛАВИАТУРА -->
+        <div class="virtual-keyboard" id="virtual-keyboard">
+            <div class="keyboard-row">
+                <div class="keyboard-key" data-key="1">1</div>
+                <div class="keyboard-key" data-key="2">2</div>
+                <div class="keyboard-key" data-key="3">3</div>
+                <div class="keyboard-key" data-key="4">4</div>
+                <div class="keyboard-key" data-key="5">5</div>
+                <div class="keyboard-key" data-key="6">6</div>
+                <div class="keyboard-key" data-key="7">7</div>
+                <div class="keyboard-key" data-key="8">8</div>
+                <div class="keyboard-key" data-key="9">9</div>
+                <div class="keyboard-key" data-key="0">0</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="keyboard-key" data-key="q">q</div>
+                <div class="keyboard-key" data-key="w">w</div>
+                <div class="keyboard-key" data-key="e">e</div>
+                <div class="keyboard-key" data-key="r">r</div>
+                <div class="keyboard-key" data-key="t">t</div>
+                <div class="keyboard-key" data-key="y">y</div>
+                <div class="keyboard-key" data-key="u">u</div>
+                <div class="keyboard-key" data-key="i">i</div>
+                <div class="keyboard-key" data-key="o">o</div>
+                <div class="keyboard-key" data-key="p">p</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="keyboard-key" data-key="a">a</div>
+                <div class="keyboard-key" data-key="s">s</div>
+                <div class="keyboard-key" data-key="d">d</div>
+                <div class="keyboard-key" data-key="f">f</div>
+                <div class="keyboard-key" data-key="g">g</div>
+                <div class="keyboard-key" data-key="h">h</div>
+                <div class="keyboard-key" data-key="j">j</div>
+                <div class="keyboard-key" data-key="k">k</div>
+                <div class="keyboard-key" data-key="l">l</div>
+                <div class="keyboard-key" data-key="backspace">←</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="keyboard-key" data-key="z">z</div>
+                <div class="keyboard-key" data-key="x">x</div>
+                <div class="keyboard-key" data-key="c">c</div>
+                <div class="keyboard-key" data-key="v">v</div>
+                <div class="keyboard-key" data-key="b">b</div>
+                <div class="keyboard-key" data-key="n">n</div>
+                <div class="keyboard-key" data-key="m">m</div>
+                <div class="keyboard-key" data-key="space" style="flex: 3;">ПРОБЕЛ</div>
+                <div class="keyboard-key" data-key="enter" style="flex: 2;">ВВОД</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // ОСНОВНОЙ КОД TRON AI
+        // ============================================================================
+
+        class TRONAI {
+            constructor() {
+                // Конфигурация
+                this.config = {
+                    masterPassword: "@/lovelivelife1992",
+                    sessionTimeout: 60 * 60 * 1000, // 1 час
+                    maxHistory: 100,
+                    aiName: "TRON",
+                    version: "2.0",
+                    user: "root"
+                };
+
+                // Состояние системы
+                this.state = {
+                    authenticated: false,
+                    sessionStart: null,
+                    currentDir: "~",
+                    commandHistory: [],
+                    historyIndex: -1,
+                    aiMode: "gpt", // gpt, llama, deepseek
+                    memory: [],
+                    settings: {
+                        sound: true,
+                        animations: true,
+                        autoComplete: true,
+                        theme: "matrix"
+                    }
+                };
+
+                // Команды системы
+                this.commands = {
+                    // Основные команды
+                    help: {
+                        description: "Показать справку по командам",
+                        execute: () => this.showHelp()
+                    },
+                    clear: {
+                        description: "Очистить терминал",
+                        execute: () => this.clearTerminal()
+                    },
+                    version: {
+                        description: "Показать версию TRON AI",
+                        execute: () => this.showVersion()
+                    },
+                    time: {
+                        description: "Показать текущее время и дату",
+                        execute: () => this.showTime()
+                    },
+                    exit: {
+                        description: "Выйти из TRON AI",
+                        execute: () => this.logout()
+                    },
+
+                    // Навигация
+                    ls: {
+                        description: "Показать содержимое директории",
+                        execute: (args) => this.listDirectory(args)
+                    },
+                    cd: {
+                        description: "Сменить директорию",
+                        execute: (args) => this.changeDirectory(args)
+                    },
+                    pwd: {
+                        description: "Показать текущую директорию",
+                        execute: () => this.printWorkingDirectory()
+                    },
+
+                    // Файловая система
+                    cat: {
+                        description: "Показать содержимое файла",
+                        execute: (args) => this.catFile(args)
+                    },
+                    mkdir: {
+                        description: "Создать директорию",
+                        execute: (args) => this.makeDirectory(args)
+                    },
+                    touch: {
+                        description: "Создать файл",
+                        execute: (args) => this.touchFile(args)
+                    },
+                    rm: {
+                        description: "Удалить файл или директорию",
+                        execute: (args) => this.removeFile(args)
+                    },
+
+                    // Системные команды
+                    sysinfo: {
+                        description: "Информация о системе",
+                        execute: () => this.systemInfo()
+                    },
+                    ps: {
+                        description: "Показать запущенные процессы",
+                        execute: () => this.showProcesses()
+                    },
+                    kill: {
+                        description: "Остановить процесс",
+                        execute: (args) => this.killProcess(args)
+                    },
+
+                    // ИИ команды
+                    ai: {
+                        description: "Задать вопрос ИИ",
+                        execute: (args) => this.aiChat(args.join(" "))
+                    },
+                    mode: {
+                        description: "Сменить режим ИИ (gpt, llama, deepseek)",
+                        execute: (args) => this.changeMode(args[0])
+                    },
+                    memory: {
+                        description: "Показать историю диалога",
+                        execute: () => this.showMemory()
+                    },
+
+                    // Безопасность
+                    passwd: {
+                        description: "Сменить пароль",
+                        execute: () => this.changePassword()
+                    },
+                    encrypt: {
+                        description: "Зашифровать текст",
+                        execute: (args) => this.encryptText(args.join(" "))
+                    },
+                    decrypt: {
+                        description: "Расшифровать текст",
+                        execute: (args) => this.decryptText(args.join(" "))
+                    },
+
+                    // Утилиты
+                    calc: {
+                        description: "Калькулятор",
+                        execute: (args) => this.calculator(args.join(" "))
+                    },
+                    echo: {
+                        description: "Вывести текст",
+                        execute: (args) => this.echoText(args.join(" "))
+                    },
+                    ping: {
+                        description: "Проверить соединение",
+                        execute: (args) => this.pingHost(args[0])
+                    },
+
+                    // Игры
+                    guess: {
+                        description: "Игра 'Угадай число'",
+                        execute: () => this.guessNumberGame()
+                    },
+                    maze: {
+                        description: "Генератор лабиринта",
+                        execute: () => this.generateMaze()
+                    },
+
+                    // Настройки
+                    settings: {
+                        description: "Настройки системы",
+                        execute: () => this.showSettings()
+                    },
+                    theme: {
+                        description: "Сменить тему",
+                        execute: (args) => this.changeTheme(args[0])
+                    }
+                };
+
+                // Виртуальная файловая система
+                this.fs = {
+                    "~": {
+                        type: "dir",
+                        contents: {
+                            "readme.txt": "Добро пожаловать в TRON AI!\n\nЭто виртуальная файловая система.\nИспользуйте команды:\n  ls - список файлов\n  cat <file> - показать файл\n  touch <file> - создать файл\n  rm <file> - удалить файл",
+                            ".config": {
+                                type: "dir",
+                                contents: {
+                                    "ai_settings.json": '{"mode":"gpt","temperature":0.7}',
+                                    "user_profile.json": '{"name":"root","level":"admin"}'
+                                }
+                            },
+                            "logs": {
+                                type: "dir",
+                                contents: {
+                                    "system.log": "2024-01-01: Система инициализирована\n2024-01-01: TRON AI запущен",
+                                    "session.log": "Сессия активна"
+                                }
+                            },
+                            "projects": {
+                                type: "dir",
+                                contents: {
+                                    "ai_research.txt": "Исследование ИИ...",
+                                    "quantum_computing.md": "# Квантовые вычисления"
+                                }
+                            }
+                        }
+                    }
+                };
+
+                this.init();
+            }
+
+            // ============================================================================
+            // ИНИЦИАЛИЗАЦИЯ
+            // ============================================================================
+
+            init() {
+                this.bindEvents();
+                this.checkSession();
+                this.renderCommandChips();
+                
+                // Проверка платформы
+                this.detectPlatform();
+                
+                // Сохраняем ссылки на DOM элементы
+                this.elements = {
+                    authScreen: document.getElementById('auth-screen'),
+                    terminal: document.getElementById('tron-terminal'),
+                    authPassword: document.getElementById('auth-password'),
+                    authLogin: document.getElementById('auth-login'),
+                    authError: document.getElementById('auth-error'),
+                    output: document.getElementById('output'),
+                    commandInput: document.getElementById('command-input'),
+                    sendBtn: document.getElementById('send-btn'),
+                    currentDir: document.getElementById('current-dir'),
+                    suggestions: document.getElementById('suggestions'),
+                    virtualKeyboard: document.getElementById('virtual-keyboard'),
+                    showKeyboard: document.getElementById('show-keyboard'),
+                    commandsPanel: document.getElementById('commands-panel'),
+                    statusText: document.getElementById('status-text')
+                };
+
+                // Приветственное сообщение
+                setTimeout(() => {
+                    if (!this.state.authenticated) {
+                        this.elements.authPassword.focus();
+                    }
+                }, 100);
+            }
+
+            detectPlatform() {
+                const ua = navigator.userAgent;
+                let platform = "desktop";
+                
+                if (/android/i.test(ua)) {
+                    platform = "android";
+                    this.config.user = "mobile";
+                } else if (/iphone|ipad|ipod/i.test(ua)) {
+                    platform = "ios";
+                    this.config.user = "mobile";
+                } else if (/windows/i.test(ua)) {
+                    platform = "windows";
+                } else if (/linux/i.test(ua)) {
+                    platform = "linux";
+                } else if (/mac/i.test(ua)) {
+                    platform = "macos";
+                }
+                
+                console.log(`Platform detected: ${platform}`);
+                this.state.platform = platform;
+            }
+
+            // ============================================================================
+            // АУТЕНТИФИКАЦИЯ
+            // ============================================================================
+
+            checkSession() {
+                const session = localStorage.getItem('tron_session');
+                if (session) {
+                    try {
+                        const data = JSON.parse(session);
+                        const now = Date.now();
+                        
+                        if (now - data.timestamp < this.config.sessionTimeout) {
+                            this.state.authenticated = true;
+                            this.state.sessionStart = data.timestamp;
+                            this.showTerminal();
+                            this.printWelcome();
+                            return true;
+                        } else {
+                            localStorage.removeItem('tron_session');
+                        }
+                    } catch (e) {
+                        localStorage.removeItem('tron_session');
+                    }
+                }
+                return false;
+            }
+
+            authenticate(password) {
+                if (password === this.config.masterPassword) {
+                    this.state.authenticated = true;
+                    this.state.sessionStart = Date.now();
+                    
+                    // Сохраняем сессию
+                    localStorage.setItem('tron_session', JSON.stringify({
+                        timestamp: this.state.sessionStart,
+                        user: this.config.user
+                    }));
+                    
+                    this.showTerminal();
+                    this.printWelcome();
+                    this.playSound('login');
+                    return true;
+                }
+                return false;
+            }
+
+            logout() {
+                this.state.authenticated = false;
+                localStorage.removeItem('tron_session');
+                this.elements.terminal.classList.add('hidden');
+                this.elements.authScreen.classList.remove('hidden');
+                this.elements.authPassword.value = '';
+                this.elements.authError.textContent = '';
+                this.elements.authPassword.focus();
+                this.playSound('logout');
+            }
+
+            changePassword() {
+                this.printMessage('system', 'Смена пароля временно недоступна в веб-версии');
+                this.printMessage('system', 'Для смены пароля отредактируйте config.masterPassword в коде');
+            }
+
+            // ============================================================================
+            // ОСНОВНЫЕ ФУНКЦИИ
+            // ============================================================================
+
+            executeCommand(input) {
+                if (!input.trim()) return;
+
+                const parts = input.trim().split(' ');
+                const command = parts[0].toLowerCase();
+                const args = parts.slice(1);
+
+                // Сохраняем в историю
+                this.state.commandHistory.push(input);
+                this.state.historyIndex = this.state.commandHistory.length;
+
+                // Выводим команду пользователя
+                this.printMessage('user', input);
+
+                // Исполняем команду
+                if (this.commands[command]) {
+                    try {
+                        this.commands[command].execute(args);
+                    } catch (error) {
+                        this.printMessage('error', `Ошибка выполнения: ${error.message}`);
+                    }
+                } else if (command.startsWith('ai ') || command === 'ai') {
+                    const question = command === 'ai' ? args.join(' ') : input.substring(3);
+                    this.aiChat(question);
+                } else {
+                    this.printMessage('error', `Команда не найдена: ${command}`);
+                    this.printMessage('system', 'Введите "help" для списка команд');
+                }
+
+                // Прокручиваем вниз
+                this.scrollToBottom();
+            }
+
+            aiChat(question) {
+                if (!question.trim()) {
+                    this.printMessage('tron', 'Задайте вопрос, например: ai Как работает ИИ?');
+                    return;
+                }
+
+                this.printMessage('tron', '🤔 Думаю...');
+                
+                // Имитация задержки ИИ
+                setTimeout(() => {
+                    const response = this.generateAIResponse(question);
+                    this.printMessage('tron', response);
+                    
+                    // Сохраняем в память
+                    this.state.memory.push({
+                        question: question,
+                        response: response,
+                        timestamp: Date.now(),
+                        mode: this.state.aiMode
+                    });
+                }, 500 + Math.random() * 1000);
+            }
+
+            generateAIResponse(question) {
+                const responses = {
+                    gpt: [
+                        `Анализирую ваш запрос: "${question}"\n\nНа основе GPT-подхода, рекомендую:\n1. Разбить задачу на подзадачи\n2. Проанализировать каждый компонент\n3. Интегрировать решения\n4. Протестировать результат`,
+                        
+                        `Вопрос: ${question}\n\nGPT-ответ:\nСистемный анализ показывает, что оптимальным решением будет:\n• Использовать модульный подход\n• Внедрить проверку ошибок\n• Оптимизировать производительность\n• Документировать процесс`,
+                        
+                        `📊 Анализ запроса завершен.\n\nРекомендации GPT:\n1. Структурировать данные\n2. Применить алгоритмический подход\n3. Внедрить машинное обучение\n4. Валидировать результаты`
+                    ],
+                    
+                    llama: [
+                        `🧠 Llama-мышление активировано!\n\nНа ваш вопрос "${question}" предлагаю:\n🎯 Креативное решение: Инвертировать подход\n💡 Идея: Использовать нейросети\n✨ Альтернатива: Квантовые вычисления`,
+                        
+                        `В режиме Llama думаю так:\n\n"${question}" - это интересно!\nПопробуйте:\n🔮 Нестандартный подход\n🌈 Комбинацию методов\n🚀 Экспериментальную технику`,
+                        
+                        `🦙 Llama-mode: ON\n\nКреативный ответ на "${question}":\n• Предлагаю революционный метод\n• Рассмотреть биоинспирированные алгоритмы\n• Использовать swarm intelligence`
+                    ],
+                    
+                    deepseek: [
+                        `🚀 DeepSeek режим: Активирован\n\nЗапрос: ${question}\n\nПрактическое решение:\n\`\`\`python\n# Пример реализации\ndef solve_problem():\n    # 1. Инициализация\n    # 2. Обработка данных\n    # 3. Возврат результата\n\`\`\``,
+                        
+                        `🔧 DeepSeek ответ:\n\nДля "${question}" рекомендую:\n1. Создать архитектуру решения\n2. Написать эффективный код\n3. Протестировать на edge cases\n4. Оптимизировать производительность`,
+                        
+                        `💻 Практический подход DeepSeek:\n\n${question}\n\nШаги реализации:\n1. Анализ требований\n2. Проектирование системы\n3. Кодирование\n4. Тестирование\n5. Деплой`
+                    ]
+                };
+
+                const modeResponses = responses[this.state.aiMode] || responses.gpt;
+                const randomIndex = Math.floor(Math.random() * modeResponses.length);
+                
+                return `[${this.state.aiMode.toUpperCase()} MODE]\n\n${modeResponses[randomIndex]}\n\n📁 Сохранено в память ИИ`;
+            }
+
+            // ============================================================================
+            // КОМАНДЫ СИСТЕМЫ
+            // ============================================================================
+
+            showHelp() {
+                let helpText = "📚 ДОСТУПНЫЕ КОМАНДЫ:\n\n";
+                
+                const categories = {
+                    "Основные": ['help', 'clear', 'version', 'time', 'exit'],
+                    "Навигация": ['ls', 'cd', 'pwd'],
+                    "Файлы": ['cat', 'mkdir', 'touch', 'rm'],
+                    "Система": ['sysinfo', 'ps', 'kill'],
+                    "ИИ": ['ai', 'mode', 'memory'],
+                    "Безопасность": ['passwd', 'encrypt', 'decrypt'],
+                    "Утилиты": ['calc', 'echo', 'ping'],
+                    "Игры": ['guess', 'maze'],
+                    "Настройки": ['settings', 'theme']
+                };
+                
+                for (const [category, commands] of Object.entries(categories)) {
+                    helpText += `\n🔹 ${category}:\n`;
+                    commands.forEach(cmd => {
+                        helpText += `  ${cmd.padEnd(10)} - ${this.commands[cmd].description}\n`;
+                    });
+                }
+                
+                helpText += "\n📝 Примеры:\n";
+                helpText += "  ai Как создать ИИ?\n";
+                helpText += "  sysinfo\n";
+                helpText += "  calc 2 + 2 * 3\n";
+                helpText += "  mode llama\n";
+                
+                this.printMessage('system', helpText);
+            }
+
+            showVersion() {
+                const versionText = `
+╔════════════════════════════════════════╗
+║           TRON AI v${this.config.version}           ║
+╠════════════════════════════════════════╣
+║ • Локальный искусственный интеллект    ║
+║ • Полная автономность                  ║
+║ • Расширенная безопасность             ║
+║ • Кроссплатформенность                 ║
+╠════════════════════════════════════════╣
+║ Сессия:     ${this.state.sessionStart ? new Date(this.state.sessionStart).toLocaleTimeString() : 'Новая'}
+║ Пользователь: ${this.config.user}
+║ Режим ИИ:    ${this.state.aiMode.toUpperCase()}
+║ Платформа:  ${this.state.platform}
+╚════════════════════════════════════════╝
+                `;
+                this.printMessage('system', versionText);
+            }
+
+            showTime() {
+                const now = new Date();
+                const timeText = `
+📅 Дата: ${now.toLocaleDateString('ru-RU', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })}
+⏰ Время: ${now.toLocaleTimeString('ru-RU')}
+🌍 Часовой пояс: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
+⏱️ Unix Time: ${Math.floor(now.getTime() / 1000)}
+                `;
+                this.printMessage('system', timeText);
+            }
+
+            systemInfo() {
+                const info = `
+💻 СИСТЕМНАЯ ИНФОРМАЦИЯ:
+
+🌐 Браузер: ${navigator.userAgent.split(') ')[0].split('(')[1]}
+📱 Платформа: ${navigator.platform}
+🖥️ Язык: ${navigator.language}
+🕐 Часовой пояс: ${Intl.DateTimeFormat().resolvedOptions().timeZone}
+
+💾 Память:
+  • Всего команд: ${this.state.commandHistory.length}
+  • Сохранено в ИИ: ${this.state.memory.length} диалогов
+  • История: ${localStorage.length} элементов
+
+🔐 Безопасность:
+  • Аутентификация: ${this.state.authenticated ? '✅' : '❌'}
+  • Сессия: ${this.state.sessionStart ? 'Активна' : 'Неактивна'}
+  • Режим: ${this.state.aiMode.toUpperCase()}
+
+⚙️ Настройки:
+  • Звук: ${this.state.settings.sound ? '✅' : '❌'}
+  • Анимации: ${this.state.settings.animations ? '✅' : '❌'}
+  • Автозавершение: ${this.state.settings.autoComplete ? '✅' : '❌'}
+                `;
+                this.printMessage('system', info);
+            }
+
+            listDirectory(args) {
+                const path = args[0] || this.state.currentDir;
+                let current = this.fs;
+                
+                // Навигация по пути
+                const parts = path.split('/').filter(p => p);
+                for (const part of parts) {
+                    if (current[part] && current[part].type === 'dir') {
+                        current = current[part].contents;
+                    } else {
+                        this.printMessage('error', `Директория не найдена: ${path}`);
+                        return;
+                    }
+                }
+                
+                // Если мы в корне
+                if (path === '~' || path === '/') {
+                    current = this.fs['~'].contents;
+                }
+                
+                let output = `📁 Содержимое ${path}:\n\n`;
+                const items = [];
+                
+                for (const [name, item] of Object.entries(current)) {
+                    if (typeof item === 'object' && item.type === 'dir') {
+                        items.push(`📁 ${name}/`);
+                    } else if (typeof item === 'string') {
+                        items.push(`📄 ${name}`);
+                    }
+                }
+                
+                if (items.length === 0) {
+                    output += "  (пусто)";
+                } else {
+                    items.sort();
+                    output += items.map(item => `  ${item}`).join('\n');
+                }
+                
+                this.printMessage('system', output);
+            }
+
+            changeDirectory(args) {
+                if (!args[0]) {
+                    this.state.currentDir = "~";
+                    this.updatePrompt();
+                    this.printMessage('system', 'Переход в домашнюю директорию');
+                    return;
+                }
+                
+                const path = args[0];
+                if (path === ".." || path === "../") {
+                    if (this.state.currentDir !== "~") {
+                        const parts = this.state.currentDir.split('/');
+                        parts.pop();
+                        this.state.currentDir = parts.join('/') || '~';
+                        this.updatePrompt();
+                        this.printMessage('system', `Директория: ${this.state.currentDir}`);
+                    }
+                } else if (path === "~" || path === "/") {
+                    this.state.currentDir = "~";
+                    this.updatePrompt();
+                    this.printMessage('system', 'Домашняя директория');
+                } else {
+                    // Проверяем существование директории
+                    const target = path.startsWith('/') ? path : `${this.state.currentDir}/${path}`;
+                    this.printMessage('system', `Переход в ${target}...`);
+                    this.state.currentDir = target;
+                    this.updatePrompt();
+                }
+            }
+
+            printWorkingDirectory() {
+                this.printMessage('system', `Текущая директория: ${this.state.currentDir}`);
+            }
+
+            catFile(args) {
+                if (!args[0]) {
+                    this.printMessage('error', 'Укажите имя файла');
+                    return;
+                }
+                
+                const filename = args[0];
+                let current = this.fs;
+                let path = this.state.currentDir;
+                
+                if (filename.includes('/')) {
+                    // Абсолютный путь
+                    const parts = filename.split('/').filter(p => p);
+                    for (const part of parts.slice(0, -1)) {
+                        if (current[part] && current[part].type === 'dir') {
+                            current = current[part].contents;
+                        } else {
+                            this.printMessage('error', `Путь не найден: ${filename}`);
+                            return;
+                        }
+                    }
+                    path = parts.join('/');
+                } else {
+                    // Относительный путь
+                    if (this.state.currentDir !== '~') {
+                        const parts = this.state.currentDir.split('/').filter(p => p);
+                        for (const part of parts) {
+                            if (current[part] && current[part].type === 'dir') {
+                                current = current[part].contents;
+                            }
+                        }
+                    } else {
+                        current = this.fs['~'].contents;
+                    }
+                }
+                
+                const fileKey = filename.includes('/') ? filename.split('/').pop() : filename;
+                
+                if (current[fileKey] && typeof current[fileKey] === 'string') {
+                    this.printMessage('system', `📄 ${filename}:\n\n${current[fileKey]}`);
+                } else if (current[fileKey] && current[fileKey].type === 'dir') {
+                    this.printMessage('error', `${filename} - это директория, используйте ls`);
+                } else {
+                    this.printMessage('error', `Файл не найден: ${filename}`);
+                }
+            }
+
+            makeDirectory(args) {
+                if (!args[0]) {
+                    this.printMessage('error', 'Укажите имя директории');
+                    return;
+                }
+                
+                const dirname = args[0];
+                this.printMessage('system', `Создана директория: ${dirname}`);
+                this.printMessage('system', 'Используйте "ls" для просмотра');
+            }
+
+            touchFile(args) {
+                if (!args[0]) {
+                    this.printMessage('error', 'Укажите имя файла');
+                    return;
+                }
+                
+                const filename = args[0];
+                this.printMessage('system', `Создан файл: ${filename}`);
+                this.printMessage('system', 'Используйте "cat" для просмотра');
+            }
+
+            removeFile(args) {
+                if (!args[0]) {
+                    this.printMessage('error', 'Укажите имя файла или директории');
+                    return;
+                }
+                
+                const target = args[0];
+                this.printMessage('system', `Удалено: ${target}`);
+            }
+
+            showProcesses() {
+                const processes = [
+                    { pid: 1, name: 'tron_core', cpu: '2%', mem: '45MB', status: 'Running' },
+                    { pid: 2, name: 'ai_engine', cpu: '15%', mem: '120MB', status: 'Running' },
+                    { pid: 3, name: 'security_daemon', cpu: '1%', mem: '25MB', status: 'Sleeping' },
+                    { pid: 4, name: 'memory_manager', cpu: '3%', mem: '60MB', status: 'Running' },
+                    { pid: 5, name: 'network_service', cpu: '0%', mem: '15MB', status: 'Sleeping' }
+                ];
+                
+                let output = "🔄 ЗАПУЩЕННЫЕ ПРОЦЕССЫ:\n\n";
+                output += "PID    NAME              CPU    MEM     STATUS\n";
+                output += "══════════════════════════════════════════════\n";
+                
+                processes.forEach(p => {
+                    output += `${p.pid.toString().padEnd(6)} ${p.name.padEnd(18)} ${p.cpu.padEnd(7)} ${p.mem.padEnd(8)} ${p.status}\n`;
+                });
+                
+                output += `\nВсего процессов: ${processes.length}`;
+                this.printMessage('system', output);
+            }
+
+            killProcess(args) {
+                if (!args[0]) {
+                    this.printMessage('error', 'Укажите PID процесса');
+                    return;
+                }
+                
+                const pid = args[0];
+                this.printMessage('system', `Процесс ${pid} остановлен`);
+            }
+
+            changeMode(mode) {
+                const validModes = ['gpt', 'llama', 'deepseek'];
+                
+                if (!mode || !validModes.includes(mode.toLowerCase())) {
+                    this.printMessage('error', `Укажите режим: ${validModes.join(', ')}`);
+                    return;
+                }
+                
+                this.state.aiMode = mode.toLowerCase();
+                this.printMessage('system', `✅ Режим ИИ изменен на: ${this.state.aiMode.toUpperCase()}`);
+                this.playSound('mode_change');
+            }
+
+            showMemory() {
+                if (this.state.memory.length === 0) {
+                    this.printMessage('system', 'Память ИИ пуста');
+                    return;
+                }
+                
+                let output = "🧠 ПАМЯТЬ ИИ:\n\n";
+                
+                this.state.memory.slice(-5).forEach((item, index) => {
+                    const time = new Date(item.timestamp).toLocaleTimeString();
+                    output += `[${time}] [${item.mode.toUpperCase()}]\n`;
+                    output += `Вопрос: ${item.question}\n`;
+                    output += `Ответ: ${item.response.substring(0, 100)}...\n`;
+                    output += "─".repeat(50) + "\n";
+                });
+                
+                output += `\nВсего записей: ${this.state.memory.length}`;
+                this.printMessage('system', output);
+            }
+
+            encryptText(text) {
+                if (!text) {
+                    this.printMessage('error', 'Укажите текст для шифрования');
+                    return;
+                }
+                
+                // Простое шифрование base64
+                const encoded = btoa(unescape(encodeURIComponent(text)));
+                this.printMessage('system', `🔐 Зашифрованный текст:\n\n${encoded}`);
+                this.playSound('encrypt');
+            }
+
+            decryptText(text) {
+                if (!text) {
+                    this.printMessage('error', 'Укажите текст для расшифровки');
+                    return;
+                }
+                
+                try {
+                    const decoded = decodeURIComponent(escape(atob(text)));
+                    this.printMessage('system', `🔓 Расшифрованный текст:\n\n${decoded}`);
+                    this.playSound('decrypt');
+                } catch (e) {
+                    this.printMessage('error', 'Ошибка расшифровки: неверный формат');
+                }
+            }
+
+            calculator(expression) {
+                if (!expression) {
+                    this.printMessage('error', 'Укажите выражение, например: calc 2 + 2');
+                    return;
+                }
+                
+                try {
+                    // Безопасная eval
+                    const safeExpression = expression
+                        .replace(/[^0-9+\-*/().\s]/g, '')
+                        .replace(/(\d+)\s*([+\-*/])\s*(\d+)/g, '$1 $2 $3');
+                    
+                    const result = eval(safeExpression);
+                    this.printMessage('system', `🧮 Результат: ${expression} = ${result}`);
+                } catch (e) {
+                    this.printMessage('error', 'Ошибка вычисления');
+                }
+            }
+
+            echoText(text) {
+                if (!text) {
+                    this.printMessage('error', 'Укажите текст для вывода');
+                    return;
+                }
+                
+                this.printMessage('system', text);
+            }
+
+            pingHost(host) {
+                if (!host) {
+                    host = 'localhost';
+                }
+                
+                const latency = Math.floor(Math.random() * 100) + 1;
+                this.printMessage('system', `🏓 PING ${host}\nОтвет за ${latency}ms\nСтатус: ✅ ONLINE`);
+            }
+
+            guessNumberGame() {
+                const number = Math.floor(Math.random() * 100) + 1;
+                let attempts = 0;
+                
+                this.printMessage('system', '🎮 ИГРА: Угадай число (1-100)\nВведите число или "стоп" для выхода');
+                
+                const gameListener = (input) => {
+                    const guess = input.trim().toLowerCase();
+                    
+                    if (guess === 'стоп' || guess === 'exit') {
+                        this.printMessage('system', 'Игра завершена');
+                        this.removeGameListener(gameListener);
+                        return;
+                    }
+                    
+                    const num = parseInt(guess);
+                    if (isNaN(num) || num < 1 || num > 100) {
+                        this.printMessage('error', 'Введите число от 1 до 100');
+                        return;
+                    }
+                    
+                    attempts++;
+                    
+                    if (num === number) {
+                        this.printMessage('system', `🎉 Поздравляем! Вы угадали число ${number} за ${attempts} попыток!`);
+                        this.playSound('win');
+                        this.removeGameListener(gameListener);
+                    } else if (num < number) {
+                        this.printMessage('system', 'Больше!');
+                    } else {
+                        this.printMessage('system', 'Меньше!');
+                    }
+                };
+                
+                this.addGameListener(gameListener);
+            }
+
+            generateMaze() {
+                const size = 10;
+                let maze = "🌀 ГЕНЕРАТОР ЛАБИРИНТА:\n\n";
+                
+                for (let i = 0; i < size; i++) {
+                    for (let j = 0; j < size; j++) {
+                        if (i === 0 && j === 0) {
+                            maze += '🚀';
+                        } else if (i === size - 1 && j === size - 1) {
+                            maze += '🏁';
+                        } else {
+                            maze += Math.random() > 0.3 ? '██' : '  ';
+                        }
+                    }
+                    maze += '\n';
+                }
+                
+                maze += '\n🚀 - Старт\n🏁 - Финиш';
+                this.printMessage('system', maze);
+            }
+
+            showSettings() {
+                let settingsText = "⚙️ НАСТРОЙКИ СИСТЕМЫ:\n\n";
+                
+                for (const [key, value] of Object.entries(this.state.settings)) {
+                    settingsText += `  ${key}: ${value ? '✅' : '❌'}\n`;
+                }
+                
+                settingsText += "\nИспользуйте команды:\n";
+                settingsText += "  settings sound on/off\n";
+                settingsText += "  settings animations on/off\n";
+                settingsText += "  settings autocomplete on/off\n";
+                
+                this.printMessage('system', settingsText);
+            }
+
+            changeTheme(theme) {
+                const themes = {
+                    matrix: ['#00ff00', '#000000'],
+                    cyberpunk: ['#ff00ff', '#0a0a0a'],
+                    terminal: ['#ffffff', '#000000'],
+                    blue: ['#00ffff', '#000011']
+                };
+                
+                if (!theme || !themes[theme]) {
+                    this.printMessage('error', `Доступные темы: ${Object.keys(themes).join(', ')}`);
+                    return;
+                }
+                
+                const [primary, bg] = themes[theme];
+                document.documentElement.style.setProperty('--primary', primary);
+                document.documentElement.style.setProperty('--bg', bg);
+                
+                this.printMessage('system', `✅ Тема изменена на: ${theme}`);
+                this.playSound('theme_change');
+            }
+
+            // ============================================================================
+            // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+            // ============================================================================
+
+            printMessage(type, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}-message`;
+                
+                const timestamp = new Date().toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                
+                const headers = {
+                    user: '👤 ПОЛЬЗОВАТЕЛЬ',
+                    tron: '🤖 TRON AI',
+                    system: '⚙️ СИСТЕМА',
+                    error: '⚠️ ОШИБКА'
+                };
+                
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <span>${headers[type] || '💬 СООБЩЕНИЕ'}</span>
+                        <span>${timestamp}</span>
+                    </div>
+                    <div class="message-content">${this.formatContent(content)}</div>
+                `;
+                
+                this.elements.output.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            formatContent(content) {
+                // Обработка переносов строк и кода
+                return content
+                    .replace(/\\n/g, '<br>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/`([^`]+)`/g, '<code>$1</code>')
+                    .replace(/```([^`]+)```/gs, '<pre>$1</pre>')
+                    .replace(/\*(.+?)\*/g, '<strong>$1</strong>')
+                    .replace(/_(.+?)_/g, '<em>$1</em>');
+            }
+
+            clearTerminal() {
+                this.elements.output.innerHTML = '';
+                this.printMessage('system', 'Терминал очищен');
+                this.playSound('clear');
+            }
+
+            updatePrompt() {
+                this.elements.currentDir.textContent = this.state.currentDir;
+            }
+
+            scrollToBottom() {
+                this.elements.output.scrollTop = this.elements.output.scrollHeight;
+            }
+
+            playSound(type) {
+                if (!this.state.settings.sound) return;
+                
+                const sounds = {
+                    login: [523, 659, 784],
+                    logout: [784, 659, 523],
+                    clear: [262, 330, 392],
+                    mode_change: [392, 494, 587],
+                    encrypt: [440, 554, 659],
+                    decrypt: [659, 554, 440],
+                    win: [659, 830, 988],
+                    theme_change: [330, 440, 554]
+                };
+                
+                if (sounds[type]) {
+                    // Простая звуковая симуляция через Web Audio API
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const playNote = (frequency, time) => {
+                            const oscillator = audioContext.createOscillator();
+                            const gainNode = audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioContext.destination);
+                            
+                            oscillator.frequency.value = frequency;
+                            oscillator.type = 'sine';
+                            
+                            gainNode.gain.setValueAtTime(0.1, time);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                            
+                            oscillator.start(time);
+                            oscillator.stop(time + 0.1);
+                        };
+                        
+                        sounds[type].forEach((freq, i) => {
+                            playNote(freq, audioContext.currentTime + i * 0.1);
+                        });
+                    } catch (e) {
+                        // Web Audio не поддерживается
+                        console.log('Звук: ' + type);
+                    }
+                }
+            }
+
+            // ============================================================================
+            // UI УПРАВЛЕНИЕ
+            // ============================================================================
+
+            bindEvents() {
+                // Аутентификация
+                document.getElementById('auth-login').addEventListener('click', () => this.handleLogin());
+                document.getElementById('auth-password').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleLogin();
+                });
+                
+                // Команды
+                document.getElementById('send-btn').addEventListener('click', () => this.handleCommand());
+                document.getElementById('command-input').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleCommand();
+                });
+                
+                // История команд (стрелки вверх/вниз)
+                document.getElementById('command-input').addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        this.navigateHistory(-1);
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        this.navigateHistory(1);
+                    } else if (e.key === 'Tab') {
+                        e.preventDefault();
+                        this.autoComplete();
+                    }
+                });
+                
+                // Автодополнение при вводе
+                document.getElementById('command-input').addEventListener('input', (e) => {
+                    this.showSuggestions(e.target.value);
+                });
+                
+                // Кнопки интерфейса
+                document.getElementById('btn-clear').addEventListener('click', () => this.clearTerminal());
+                document.getElementById('btn-help').addEventListener('click', () => this.showHelp());
+                document.getElementById('btn-logout').addEventListener('click', () => this.logout());
+                document.getElementById('btn-settings').addEventListener('click', () => this.showSettings());
+                
+                // Виртуальная клавиатура
+                document.getElementById('show-keyboard').addEventListener('click', () => {
+                    this.toggleVirtualKeyboard();
+                });
+                
+                // Закрытие подсказок при клике вне
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('#suggestions') && !e.target.closest('#command-input')) {
+                        this.elements.suggestions.style.display = 'none';
+                    }
+                });
+                
+                // Обработка виртуальной клавиатуры
+                this.setupVirtualKeyboard();
+                
+                // Адаптация для мобильных устройств
+                if (this.state.platform === 'android' || this.state.platform === 'ios') {
+                    this.setupMobileOptimizations();
+                }
+            }
+
+            handleLogin() {
+                const password = this.elements.authPassword.value.trim();
+                
+                if (!password) {
+                    this.elements.authError.textContent = 'Введите пароль';
+                    return;
+                }
+                
+                if (this.authenticate(password)) {
+                    this.elements.authError.textContent = '';
+                } else {
+                    this.elements.authError.textContent = 'Неверный пароль';
+                    this.playSound('error');
+                }
+            }
+
+            handleCommand() {
+                const input = this.elements.commandInput.value.trim();
+                if (input) {
+                    this.executeCommand(input);
+                    this.elements.commandInput.value = '';
+                    this.elements.suggestions.style.display = 'none';
+                }
+            }
+
+            navigateHistory(direction) {
+                if (this.state.commandHistory.length === 0) return;
+                
+                this.state.historyIndex += direction;
+                
+                if (this.state.historyIndex < 0) {
+                    this.state.historyIndex = 0;
+                } else if (this.state.historyIndex >= this.state.commandHistory.length) {
+                    this.state.historyIndex = this.state.commandHistory.length;
+                    this.elements.commandInput.value = '';
+                    return;
+                }
+                
+                this.elements.commandInput.value = this.state.commandHistory[this.state.historyIndex];
+            }
+
+            showSuggestions(input) {
+                if (!this.state.settings.autoComplete || !input) {
+                    this.elements.suggestions.style.display = 'none';
+                    return;
+                }
+                
+                const suggestions = Object.keys(this.commands)
+                    .filter(cmd => cmd.startsWith(input.toLowerCase()))
+                    .slice(0, 5);
+                
+                if (suggestions.length === 0) {
+                    this.elements.suggestions.style.display = 'none';
+                    return;
+                }
+                
+                this.elements.suggestions.innerHTML = suggestions
+                    .map(cmd => `<div class="suggestion-item" data-cmd="${cmd}">${cmd} - ${this.commands[cmd].description}</div>`)
+                    .join('');
+                
+                this.elements.suggestions.style.display = 'block';
+                
+                // Обработка клика по подсказке
+                this.elements.suggestions.querySelectorAll('.suggestion-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.elements.commandInput.value = item.dataset.cmd;
+                        this.elements.suggestions.style.display = 'none';
+                        this.elements.commandInput.focus();
+                    });
+                });
+            }
+
+            autoComplete() {
+                const input = this.elements.commandInput.value.trim();
+                if (!input) return;
+                
+                const matches = Object.keys(this.commands)
+                    .filter(cmd => cmd.startsWith(input.toLowerCase()));
+                
+                if (matches.length === 1) {
+                    this.elements.commandInput.value = matches[0];
+                } else if (matches.length > 1) {
+                    this.printMessage('system', `Возможные команды: ${matches.join(', ')}`);
+                }
+            }
+
+            renderCommandChips() {
+                const commands = ['help', 'sysinfo', 'ai', 'ls', 'clear', 'calc', 'mode', 'memory'];
+                
+                this.elements.commandsPanel.innerHTML = commands
+                    .map(cmd => `<div class="cmd-chip" data-cmd="${cmd}">${cmd}</div>`)
+                    .join('');
+                
+                // Обработка клика по чипам
+                this.elements.commandsPanel.querySelectorAll('.cmd-chip').forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        const cmd = chip.dataset.cmd;
+                        if (cmd === 'ai') {
+                            this.elements.commandInput.value = 'ai ';
+                            this.elements.commandInput.focus();
+                        } else {
+                            this.executeCommand(cmd);
+                        }
+                    });
+                });
+            }
+
+            setupVirtualKeyboard() {
+                document.querySelectorAll('.keyboard-key').forEach(key => {
+                    key.addEventListener('click', () => {
+                        const keyValue = key.dataset.key;
+                        const input = this.elements.commandInput;
+                        
+                        if (keyValue === 'backspace') {
+                            input.value = input.value.slice(0, -1);
+                        } else if (keyValue === 'enter') {
+                            this.handleCommand();
+                        } else if (keyValue === 'space') {
+                            input.value += ' ';
+                        } else {
+                            input.value += keyValue;
+                        }
+                        
+                        input.focus();
+                        this.showSuggestions(input.value);
+                    });
+                });
+            }
+
+            toggleVirtualKeyboard() {
+                const keyboard = this.elements.virtualKeyboard;
+                if (keyboard.style.display === 'flex') {
+                    keyboard.style.display = 'none';
+                } else {
+                    keyboard.style.display = 'flex';
+                    this.scrollToBottom();
+                }
+            }
+
+            setupMobileOptimizations() {
+                // Автопоказ клавиатуры на мобильных
+                this.elements.showKeyboard.style.display = 'block';
+                
+                // Увеличение области нажатия для кнопок
+                document.querySelectorAll('.header-btn, .cmd-chip, .keyboard-key').forEach(btn => {
+                    btn.style.minHeight = '44px';
+                    btn.style.minWidth = '44px';
+                });
+                
+                // Отключение масштабирования при фокусе
+                this.elements.commandInput.addEventListener('focus', () => {
+                    setTimeout(() => {
+                        window.scrollTo(0, 0);
+                        document.body.scrollTop = 0;
+                    }, 100);
+                });
+            }
+
+            showTerminal() {
+                this.elements.authScreen.classList.add('hidden');
+                this.elements.terminal.classList.remove('hidden');
+                this.elements.commandInput.focus();
+            }
+
+            printWelcome() {
+                const welcome = `
+╔══════════════════════════════════════════════════════════╗
+║                    TRON AI v${this.config.version}                          ║
+╠══════════════════════════════════════════════════════════╣
+║  Добро пожаловать, ${this.config.user}!                                 ║
+║  Сессия: ${new Date().toLocaleString('ru-RU')}           ║
+║  Режим: ${this.state.aiMode.toUpperCase()}                               ║
+║  Платформа: ${this.state.platform}                       ║
+╠══════════════════════════════════════════════════════════╣
+║  Для начала работы введите "help"                        ║
+║  Для общения с ИИ используйте "ai <ваш вопрос>"          ║
+║  Для выхода введите "exit"                               ║
+╚══════════════════════════════════════════════════════════╝
+
+🔐 Система защищена паролем: @/lovelivelife1992
+📱 Оптимизировано для: Ryzen 5 / Poco X6 Pro
+💾 Работает полностью локально
+                `;
+                
+                this.printMessage('system', welcome);
+                
+                // Обновляем статус
+                this.elements.statusText.textContent = 'AUTHENTICATED';
+                this.elements.statusText.style.color = '#00ff00';
+            }
+
+            addGameListener(listener) {
+                this.gameListener = listener;
+            }
+
+            removeGameListener(listener) {
+                if (this.gameListener === listener) {
+                    this.gameListener = null;
+                }
+            }
+        }
+
+        // ============================================================================
+        // ЗАПУСК СИСТЕМЫ
+        // ============================================================================
+
+        // Запускаем TRON AI при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            window.tronAI = new TRONAI();
+            
+            // Сохраняем ссылку на глобальный объект для отладки
+            console.log('TRON AI v2.0 запущен');
+            console.log('Используйте window.tronAI для доступа');
+        });
+
+        // Обработка закрытия страницы
+        window.addEventListener('beforeunload', (e) => {
+            if (window.tronAI && window.tronAI.state.authenticated) {
+                // Можно сохранить состояние
+                localStorage.setItem('tron_state', JSON.stringify({
+                    lastCommand: window.tronAI.state.commandHistory.slice(-1)[0],
+                    timestamp: Date.now()
+                }));
+            }
+        });
+    </script>
+</body>
+</html>
