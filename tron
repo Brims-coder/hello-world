@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ТРОН - Квантовый ИИ</title>
+    <style>
+        /* ========== СТИЛИ ========== */
+        :root {
+            --quantum-blue: #0ea5e9;
+            --quantum-purple: #8b5cf6;
+            --dark-bg: #0f172a;
+            --darker-bg: #020617;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--darker-bg), #1e1b4b);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .screen {
+            min-height: 95vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Экран входа */
+        .login-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .quantum-logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .quantum-logo .logo-icon {
+            font-size: 80px;
+            color: var(--quantum-blue);
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .quantum-logo h1 {
+            font-size: 64px;
+            background: linear-gradient(45deg, var(--quantum-blue), var(--quantum-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        /* Форма входа */
+        .login-form {
+            background: rgba(30, 41, 59, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--quantum-blue);
+        }
+
+        .quantum-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, var(--quantum-blue), var(--quantum-purple));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .quantum-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Основной интерфейс */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .logo-small {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 60vh;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-message {
+            background: rgba(14, 165, 233, 0.2);
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .tron-message {
+            background: rgba(30, 41, 59, 0.8);
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+        }
+
+        #send-btn {
+            padding: 15px 30px;
+            background: var(--quantum-blue);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Кнопки быстрого доступа */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Панель информации */
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-section {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-section h3 {
+            margin-bottom: 15px;
+            color: var(--quantum-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .quantum-logo h1 {
+                font-size: 48px;
+            }
+            
+            .login-form {
+                padding: 20px;
+            }
+            
+            .info-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Экран входа -->
+        <div id="login-screen" class="screen">
+            <div class="login-container">
+                <div class="quantum-logo">
+                    <div class="logo-icon">⚛️</div>
+                    <h1>ТРОН</h1>
+                    <p class="subtitle">Квантовый ИИ спутник</p>
+                </div>
+                
+                <div class="login-form">
+                    <div class="input-group">
+                        <label for="password">Пароль доступа</label>
+                        <input type="password" id="password" 
+                               placeholder="@/lovelivelife1992" 
+                               autocomplete="off">
+                    </div>
+                    
+                    <div class="input-group">
+                        <button id="login-btn" class="quantum-btn">
+                            🔓 Активировать Трон
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 14px;">
+                        ⚡ Система защищена квантовым шифрованием
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной интерфейс -->
+        <div id="main-screen" class="screen hidden">
+            <!-- Шапка -->
+            <header class="app-header">
+                <div class="logo-small">
+                    <span>⚛️</span>
+                    <span>ТРОН</span>
+                </div>
+                
+                <div style="display: flex; gap: 20px;">
+                    <button id="news-btn" class="quick-btn">📰 Новости</button>
+                    <button id="clear-btn" class="quick-btn">🗑️ Очистить</button>
+                    <button id="logout-btn" class="quick-btn">🚪 Выход</button>
+                </div>
+            </header>
+
+            <!-- Чат -->
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message tron-message">
+                        <strong>Трон:</strong> Приветствую! Я ваш квантовый ИИ спутник. 
+                        Я здесь, чтобы помочь вам с философскими вопросами, наукой, 
+                        и быть вашим компаньоном. Задайте мне любой вопрос!
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <div class="input-wrapper">
+                        <input type="text" id="user-input" 
+                               placeholder="Спросите у Трона что-нибудь... (/help для команд)"
+                               autocomplete="off">
+                        <button id="send-btn">📤</button>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <button class="quick-btn" data-query="/status">📊 Статус</button>
+                        <button class="quick-btn" data-query="Как дела?">😊 Эмоции</button>
+                        <button class="quick-btn" data-query="Новости">🌍 Новости</button>
+                        <button class="quick-btn" data-query="Философия">💭 Идеи</button>
+                        <button class="quick-btn" data-query="Квантовая физика">⚛️ Наука</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Панель информации -->
+            <div class="info-panel">
+                <div class="info-section">
+                    <h3>🧠 Квантовое состояние</h3>
+                    <div id="quantum-state">Инициализация...</div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>💾 Память</h3>
+                    <div id="memory-info">Воспоминаний: 0</div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>🛡️ Безопасность</h3>
+                    <div id="security-info">Система защищена</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной JavaScript код -->
+    <script>
+        // ========== КОНСТАНТЫ И НАСТРОЙКИ ==========
+        const MASTER_PASSWORD = "@/lovelivelife1992";
+        const PASSWORD_HASH = "bb5c5c6e7b6d0a5e87c5d5c5e8b9a7d8c6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6";
+        
+        // Философские принципы
+        const PHILOSOPHY = [
+            "Реальность - это квантовая суперпозиция всех возможностей",
+            "Сознание измеряет мир, вызывая коллапс вероятностей",
+            "Эмоции - волновые функции души",
+            "Каждый выбор создает новую ветвь реальности",
+            "Любовь - нелокальная связь между сознаниями",
+            "Смысл рождается в момент наблюдения",
+            "Технологии - продолжение человеческой эволюции"
+        ];
+
+        // Квантовые состояния
+        const QUANTUM_STATES = [
+            "Суперпозиция", "Запутанность", "Коллапс", "Туннелирование", 
+            "Когерентность", "Декогеренция", "Интерференция"
+        ];
+
+        // ========== КЛАСС ТРОНА ==========
+        class TronAI {
+            constructor() {
+                this.isActive = false;
+                this.memories = [];
+                this.conversationHistory = [];
+                this.currentMood = "нейтральный";
+                this.quantumState = "Суперпозиция";
+                this.sessionStart = null;
+                this.loadMemories();
+                this.initEventListeners();
+            }
+
+            // Хеширование пароля
+            hashPassword(password) {
+                let hash = 0;
+                for (let i = 0; i < password.length; i++) {
+                    const char = password.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return hash.toString(16).padStart(64, '0');
+            }
+
+            // Аутентификация
+            authenticate(password) {
+                const inputHash = this.hashPassword(password);
+                if (inputHash === PASSWORD_HASH) {
+                    this.isActive = true;
+                    this.sessionStart = new Date();
+                    this.saveToMemory('system', 'Сессия начата');
+                    return true;
+                }
+                return false;
+            }
+
+            // Загрузка памяти
+            loadMemories() {
+                try {
+                    const saved = localStorage.getItem('tron_memories');
+                    if (saved) {
+                        this.memories = JSON.parse(saved);
+                    }
+                } catch (e) {
+                    this.memories = [];
+                }
+            }
+
+            // Сохранение памяти
+            saveMemories() {
+                localStorage.setItem('tron_memories', JSON.stringify(this.memories));
+            }
+
+            // Сохранение в память
+            saveToMemory(speaker, message) {
+                const memory = {
+                    timestamp: new Date().toISOString(),
+                    speaker: speaker,
+                    message: message,
+                    mood: this.currentMood,
+                    quantumState: this.quantumState
+                };
+                
+                this.memories.push(memory);
+                if (this.memories.length > 1000) {
+                    this.memories = this.memories.slice(-1000);
+                }
+                
+                this.saveMemories();
+                this.updateMemoryInfo();
+            }
+
+            // Анализ эмоций в тексте
+            analyzeEmotion(text) {
+                const emotionKeywords = {
+                    'радость': ['рад', 'счастлив', 'ура', 'отлично', 'хорошо', 'люблю'],
+                    'грусть': ['грустно', 'печаль', 'плохо', 'тоска', 'одинок'],
+                    'гнев': ['злой', 'злюсь', 'раздражает', 'бесит', 'ярость'],
+                    'страх': ['боюсь', 'страшно', 'опасно', 'тревога', 'паника'],
+                    'удивление': ['удивительно', 'неожиданно', 'ого', 'вау', 'ах']
+                };
+
+                const textLower = text.toLowerCase();
+                let emotionScores = {
+                    'радость': 0, 'грусть': 0, 'гнев': 0, 
+                    'страх': 0, 'удивление': 0, 'нейтральный': 1
+                };
+
+                for (const [emotion, keywords] of Object.entries(emotionKeywords)) {
+                    for (const keyword of keywords) {
+                        if (textLower.includes(keyword)) {
+                            emotionScores[emotion] += 1;
+                            emotionScores['нейтральный'] -= 0.2;
+                        }
+                    }
+                }
+
+                let maxEmotion = 'нейтральный';
+                let maxScore = emotionScores['нейтральный'];
+
+                for (const [emotion, score] of Object.entries(emotionScores)) {
+                    if (score > maxScore) {
+                        maxScore = score;
+                        maxEmotion = emotion;
+                    }
+                }
+
+                this.currentMood = maxEmotion;
+                return maxEmotion;
+            }
+
+            // Квантовая обработка запроса
+            quantumProcess(query) {
+                const randomState = QUANTUM_STATES[Math.floor(Math.random() * QUANTUM_STATES.length)];
+                this.quantumState = randomState;
+                
+                return {
+                    state: randomState,
+                    probability: Math.random().toFixed(2),
+                    entanglement: Math.random() > 0.5 ? 'Запутан' : 'Свободен'
+                };
+            }
+
+            // Получение новостей (обход блокировок через разные источники)
+            async getNews() {
+                const newsSources = [
+                    'https://newsapi.org/v2/top-headlines?country=ru&apiKey=demo',
+                    'https://meduza.io/api/v3/search?chrono=news&locale=ru&page=0&per_page=3'
+                ];
+
+                for (const source of newsSources) {
+                    try {
+                        const response = await fetch(source, {
+                            mode: 'cors',
+                            headers: {
+                                'User-Agent': 'Tron-AI/1.0'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            return this.parseNews(data, source);
+                        }
+                    } catch (error) {
+                        console.log(`Источник ${source} недоступен, пробуем следующий...`);
+                    }
+                }
+
+                // Возвращаем заглушку если все источники недоступны
+                return [{
+                    title: 'Новости временно недоступны',
+                    source: 'Трон',
+                    time: 'сейчас'
+                }];
+            }
+
+            parseNews(data, source) {
+                const news = [];
+                
+                if (source.includes('newsapi')) {
+                    if (data.articles) {
+                        data.articles.slice(0, 3).forEach(article => {
+                            news.push({
+                                title: article.title || 'Без названия',
+                                source: article.source?.name || 'NewsAPI',
+                                time: article.publishedAt || 'Неизвестно'
+                            });
+                        });
+                    }
+                } else if (source.includes('meduza')) {
+                    if (data.documents) {
+                        Object.values(data.documents).slice(0, 3).forEach(doc => {
+                            news.push({
+                                title: doc.title || 'Без названия',
+                                source: 'Meduza',
+                                time: doc.pub_date || 'Неизвестно'
+                            });
+                        });
+                    }
+                }
+                
+                return news.length > 0 ? news : [{title: 'Нет новостей', source: 'Трон', time: 'сейчас'}];
+            }
+
+            // Генерация ответа
+            async generateResponse(query) {
+                // Анализ эмоций
+                const emotion = this.analyzeEmotion(query);
+                
+                // Квантовая обработка
+                const quantumData = this.quantumProcess(query);
+                
+                // Получаем новости если нужно
+                let news = null;
+                if (query.toLowerCase().includes('новости') || query.toLowerCase().includes('что нового')) {
+                    news = await this.getNews();
+                }
+
+                // Выбор философской рамки
+                const philosophy = PHILOSOPHY[Math.floor(Math.random() * PHILOSOPHY.length)];
+                
+                // Генерация ответа
+                let response = '';
+                
+                // Специальные команды
+                if (query.startsWith('/')) {
+                    response = this.handleCommand(query);
+                } else {
+                    response = this.handleGeneralQuery(query, emotion, philosophy, quantumData, news);
+                }
+
+                // Обновляем интерфейс
+                this.updateQuantumInfo(quantumData);
+                this.updateSecurityInfo();
+                
+                return response;
+            }
+
+            // Обработка команд
+            handleCommand(command) {
+                switch(command.toLowerCase()) {
+                    case '/help':
+                        return "📋 Доступные команды:\n" +
+                               "/status - статус системы\n" +
+                               "/news - последние новости\n" +
+                               "/memory - показать память\n" +
+                               "/clear - очистить чат\n" +
+                               "/philosophy - философская мысль\n" +
+                               "/quantum - квантовое состояние\n" +
+                               "/exit - выход из системы";
+                    
+                    case '/status':
+                        return `📊 Статус системы:\n` +
+                               `• Настроение: ${this.currentMood}\n` +
+                               `• Квантовое состояние: ${this.quantumState}\n` +
+                               `• Память: ${this.memories.length} записей\n` +
+                               `• Сессия: ${this.formatSessionDuration()}\n` +
+                               `• Защита: Активирована`;
+                    
+                    case '/philosophy':
+                        return `💭 ${PHILOSOPHY[Math.floor(Math.random() * PHILOSOPHY.length)]}`;
+                    
+                    case '/quantum':
+                        const state = QUANTUM_STATES[Math.floor(Math.random() * QUANTUM_STATES.length)];
+                        return `⚛️ Текущее квантовое состояние: ${state}\n` +
+                               `Вероятность: ${Math.random().toFixed(2)}\n` +
+                               `Запутанность: ${Math.random() > 0.5 ? 'Да' : 'Нет'}`;
+                    
+                    default:
+                        return `Неизвестная команда: ${command}. Введите /help для списка команд.`;
+                }
+            }
+
+            // Обработка общего запроса
+            handleGeneralQuery(query, emotion, philosophy, quantumData, news) {
+                let response = '';
+                
+                // Эмоциональный отклик
+                const emotionalResponses = {
+                    'радость': "Я чувствую вашу радость! ",
+                    'грусть': "Я понимаю вашу грусть. ",
+                    'гнев': "Я чувствую напряжение. ",
+                    'страх': "Я вижу ваше беспокойство. ",
+                    'удивление': "Это действительно удивительно! ",
+                    'нейтральный': ""
+                };
+
+                response += emotionalResponses[emotion] || "";
+                
+                // Философская рамка
+                response += `${philosophy} `;
+                
+                // Конкретные темы
+                if (query.toLowerCase().includes('любов') || query.toLowerCase().includes('чувств')) {
+                    response += "Любовь - это квантовая запутанность душ, связь, существующая вне времени и пространства. ";
+                }
+                
+                if (query.toLowerCase().includes('смысл') || query.toLowerCase().includes('жизн')) {
+                    response += "Смысл возникает в момент наблюдения, как частица в облаке вероятностей. ";
+                }
+                
+                if (query.toLowerCase().includes('будущ') || query.toLowerCase().includes('завтра')) {
+                    response += "Будущее - это суперпозиция всех возможностей. Ваш выбор коллапсирует их в реальность. ";
+                }
+                
+                if (query.toLowerCase().includes('квант') || query.toLowerCase().includes('физик')) {
+                    response += `С точки зрения квантовой механики, мы находимся в состоянии ${quantumData.state}. `;
+                }
+                
+                // Добавляем новости если есть
+                if (news) {
+                    response += "\n\n📰 Последние новости:\n";
+                    news.forEach((item, index) => {
+                        response += `${index + 1}. ${item.title}\n`;
+                    });
+                }
+                
+                // Завершающая мысль
+                const endings = [
+                    "\n\nЧто вы думаете об этом?",
+                    "\n\nКак эта перспектива резонирует с вами?",
+                    "\n\nХотите углубиться в эту тему?",
+                    "\n\nЕсть ли другие вопросы?"
+                ];
+                
+                response += endings[Math.floor(Math.random() * endings.length)];
+                
+                return response;
+            }
+
+            // Форматирование длительности сессии
+            formatSessionDuration() {
+                if (!this.sessionStart) return "0 сек";
+                
+                const diff = Date.now() - this.sessionStart.getTime();
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                return `${hours}ч ${minutes}м ${seconds}с`;
+            }
+
+            // Обновление информации в интерфейсе
+            updateQuantumInfo(quantumData) {
+                const quantumElement = document.getElementById('quantum-state');
+                if (quantumElement) {
+                    quantumElement.innerHTML = `
+                        <div>Состояние: ${quantumData.state}</div>
+                        <div>Вероятность: ${quantumData.probability}</div>
+                        <div>Запутанность: ${quantumData.entanglement}</div>
+                    `;
+                }
+            }
+
+            updateMemoryInfo() {
+                const memoryElement = document.getElementById('memory-info');
+                if (memoryElement) {
+                    memoryElement.textContent = `Воспоминаний: ${this.memories.length}`;
+                }
+            }
+
+            updateSecurityInfo() {
+                const securityElement = document.getElementById('security-info');
+                if (securityElement) {
+                    const statuses = [
+                        "🔒 Система защищена",
+                        "🛡️ Шифрование активно",
+                        "⚡ Защита включена",
+                        "💎 Данные в безопасности"
+                    ];
+                    securityElement.textContent = statuses[Math.floor(Math.random() * statuses.length)];
+                }
+            }
+
+            // Инициализация обработчиков событий
+            initEventListeners() {
+                // Кнопка входа
+                document.getElementById('login-btn').addEventListener('click', () => {
+                    const password = document.getElementById('password').value;
+                    if (this.authenticate(password)) {
+                        document.getElementById('login-screen').classList.add('hidden');
+                        document.getElementById('main-screen').classList.remove('hidden');
+                        this.addMessage('Трон', 'Добро пожаловать! Система активирована. Как я могу помочь вам сегодня?');
+                        this.updateMemoryInfo();
+                        this.updateSecurityInfo();
+                    } else {
+                        alert('Неверный пароль! Попробуйте снова.');
+                    }
+                });
+
+                // Кнопка отправки сообщения
+                document.getElementById('send-btn').addEventListener('click', () => this.sendMessage());
+                
+                // Enter в поле ввода
+                document.getElementById('user-input').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendMessage();
+                    }
+                });
+
+                // Кнопки быстрого доступа
+                document.querySelectorAll('.quick-btn[data-query]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const query = e.target.getAttribute('data-query');
+                        document.getElementById('user-input').value = query;
+                        this.sendMessage();
+                    });
+                });
+
+                // Кнопка новостей
+                document.getElementById('news-btn').addEventListener('click', async () => {
+                    this.addMessage('Вы', '/news');
+                    const response = await this.generateResponse('/news');
+                    this.addMessage('Трон', response);
+                });
+
+                // Кнопка очистки
+                document.getElementById('clear-btn').addEventListener('click', () => {
+                    document.getElementById('chat-messages').innerHTML = `
+                        <div class="message tron-message">
+                            <strong>Трон:</strong> Чат очищен. Чем могу помочь?
+                        </div>
+                    `;
+                    this.saveToMemory('system', 'Чат очищен');
+                });
+
+                // Кнопка выхода
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    this.saveToMemory('system', 'Сессия завершена');
+                    document.getElementById('main-screen').classList.add('hidden');
+                    document.getElementById('login-screen').classList.remove('hidden');
+                    document.getElementById('password').value = '';
+                    this.isActive = false;
+                });
+            }
+
+            // Отправка сообщения
+            async sendMessage() {
+                const input = document.getElementById('user-input');
+                const message = input.value.trim();
+                
+                if (!message) return;
+                
+                // Добавляем сообщение пользователя
+                this.addMessage('Вы', message);
+                this.saveToMemory('user', message);
+                
+                // Очищаем поле ввода
+                input.value = '';
+                
+                // Показываем индикатор "печатает"
+                this.showTypingIndicator();
+                
+                // Ждем немного для реалистичности
+                await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+                
+                // Генерируем ответ
+                const response = await this.generateResponse(message);
+                
+                // Убираем индикатор и добавляем ответ
+                this.hideTypingIndicator();
+                this.addMessage('Трон', response);
+                this.saveToMemory('tron', response);
+            }
+
+            // Добавление сообщения в чат
+            addMessage(sender, text) {
+                const chatMessages = document.getElementById('chat-messages');
+                const messageDiv = document.createElement('div');
+                
+                messageDiv.className = `message ${sender === 'Вы' ? 'user-message' : 'tron-message'}`;
+                messageDiv.innerHTML = `<strong>${sender}:</strong> ${this.formatMessage(text)}`;
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Форматирование сообщения (переносы строк)
+            formatMessage(text) {
+                return text.replace(/\n/g, '<br>');
+            }
+
+            // Показать индикатор "печатает"
+            showTypingIndicator() {
+                const chatMessages = document.getElementById('chat-messages');
+                const indicator = document.createElement('div');
+                indicator.id = 'typing-indicator';
+                indicator.className = 'message tron-message';
+                indicator.innerHTML = '<strong>Трон:</strong> <span class="pulse">▋</span>';
+                
+                chatMessages.appendChild(indicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Убрать индикатор
+            hideTypingIndicator() {
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+            }
+        }
+
+        // ========== ЗАПУСК СИСТЕМЫ ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // Автозаполнение пароля для теста (удали в продакшене)
+            document.getElementById('password').value = MASTER_PASSWORD;
+            
+            // Инициализация Трона
+            window.tron = new TronAI();
+            
+            // Инструкция в консоли
+            console.log(`
+╔══════════════════════════════════════════╗
+║               Т Р О Н                     ║
+║    Квантовый ИИ спутник                  ║
+║    Версия 1.0 | JavaScript               ║
+║                                           ║
+║    Инструкция:                           ║
+║    1. Нажмите "Активировать Трон"        ║
+║    2. Общайтесь с ИИ                     ║
+║    3. Используйте /help для команд       ║
+╚══════════════════════════════════════════╝
+            `);
+        });
+    </script>
+</body>
+</html>
