@@ -1,0 +1,209 @@
+init() {
+    // ПЕРВОЕ: Сохраняем ссылки на DOM элементы
+    this.elements = {
+        authScreen: document.getElementById('auth-screen'),
+        terminal: document.getElementById('tron-terminal'),
+        authPassword: document.getElementById('auth-password'),
+        authLogin: document.getElementById('auth-login'),
+        authError: document.getElementById('auth-error'),
+        output: document.getElementById('output'),
+        commandInput: document.getElementById('command-input'),
+        sendBtn: document.getElementById('send-btn'),
+        currentDir: document.getElementById('current-dir'),
+        suggestions: document.getElementById('suggestions'),
+        virtualKeyboard: document.getElementById('virtual-keyboard'),
+        showKeyboard: document.getElementById('show-keyboard'),
+        commandsPanel: document.getElementById('commands-panel'),
+        statusText: document.getElementById('status-text')
+    };
+
+    // ВТОРОЕ: Проверяем сессию
+    this.checkSession();
+    
+    // ТРЕТЬЕ: Определяем платформу
+    this.detectPlatform();
+    
+    // ЧЕТВЕРТОЕ: Назначаем обработчики событий
+    this.bindEvents();
+    
+    // ПЯТОЕ: Рендерим команды
+    this.renderCommandChips();
+    
+    // ШЕСТОЕ: Обработка Enter в поле пароля
+    if (this.elements.authPassword) {
+        this.elements.authPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.handleLogin();
+            }
+        });
+        
+        // Прячем ошибку при начале ввода
+        this.elements.authPassword.addEventListener('input', () => {
+            if (this.elements.authError) {
+                this.elements.authError.style.display = 'none';
+            }
+        });
+    }
+    
+    // СЕДЬМОЕ: Автофокус
+    setTimeout(() => {
+        if (!this.state.authenticated && this.elements.authPassword) {
+            this.elements.authPassword.focus();
+        }
+    }, 100);
+}
+
+
+
+
+bindEvents() {
+    // Проверяем существование элементов перед назначением обработчиков
+    
+    // Аутентификация
+    if (this.elements.authLogin) {
+        this.elements.authLogin.addEventListener('click', () => this.handleLogin());
+    }
+    
+    // Команды терминала - только если мы аутентифицированы
+    if (this.elements.sendBtn) {
+        this.elements.sendBtn.addEventListener('click', () => this.handleCommand());
+    }
+    
+    if (this.elements.commandInput) {
+        this.elements.commandInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleCommand();
+        });
+        
+        this.elements.commandInput.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.navigateHistory(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.navigateHistory(1);
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                this.autoComplete();
+            }
+        });
+        
+        this.elements.commandInput.addEventListener('input', (e) => {
+            this.showSuggestions(e.target.value);
+        });
+    }
+    
+    // Кнопки интерфейса - проверяем существование
+    const buttons = ['btn-clear', 'btn-help', 'btn-logout', 'btn-settings'];
+    buttons.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener('click', () => {
+                switch(id) {
+                    case 'btn-clear': this.clearTerminal(); break;
+                    case 'btn-help': this.showHelp(); break;
+                    case 'btn-logout': this.logout(); break;
+                    case 'btn-settings': this.showSettings(); break;
+                }
+            });
+        }
+    });
+    
+    // Виртуальная клавиатура
+    if (this.elements.showKeyboard) {
+        this.elements.showKeyboard.addEventListener('click', () => {
+            this.toggleVirtualKeyboard();
+        });
+    }
+    
+    // Виртуальная клавиатура кнопки
+    document.querySelectorAll('.keyboard-key').forEach(key => {
+        key.addEventListener('click', () => {
+            const keyValue = key.dataset.key;
+            const input = this.elements.commandInput;
+            
+            if (!input) return;
+            
+            if (keyValue === 'backspace') {
+                input.value = input.value.slice(0, -1);
+            } else if (keyValue === 'enter') {
+                this.handleCommand();
+            } else if (keyValue === 'space') {
+                input.value += ' ';
+            } else {
+                input.value += keyValue;
+            }
+            
+            input.focus();
+            this.showSuggestions(input.value);
+        });
+    });
+    
+    // Закрытие подсказок
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#suggestions') && !e.target.closest('#command-input')) {
+            if (this.elements.suggestions) {
+                this.elements.suggestions.style.display = 'none';
+            }
+        }
+    });
+}
+
+
+
+renderCommandChips() {
+    if (!this.elements.commandsPanel) return;
+    
+    const commands = ['help', 'sysinfo', 'ai', 'ls', 'clear', 'calc', 'mode', 'memory'];
+    
+    this.elements.commandsPanel.innerHTML = commands
+        .map(cmd => `<div class="cmd-chip" data-cmd="${cmd}">${cmd}</div>`)
+        .join('');
+    
+    // Обработка клика по чипам
+    this.elements.commandsPanel.querySelectorAll('.cmd-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const cmd = chip.dataset.cmd;
+            if (cmd === 'ai') {
+                if (this.elements.commandInput) {
+                    this.elements.commandInput.value = 'ai ';
+                    this.elements.commandInput.focus();
+                }
+            } else {
+                this.executeCommand(cmd);
+            }
+        });
+    });
+}
+
+
+checkSession() {
+    const session = localStorage.getItem('tron_session');
+    if (session) {
+        try {
+            const data = JSON.parse(session);
+            const now = Date.now();
+            
+            if (now - data.timestamp < this.config.sessionTimeout) {
+                this.state.authenticated = true;
+                this.state.sessionStart = data.timestamp;
+                
+                // Показываем терминал только после инициализации элементов
+                setTimeout(() => {
+                    this.showTerminal();
+                    this.printWelcome();
+                }, 100);
+                
+                return true;
+            } else {
+                localStorage.removeItem('tron_session');
+            }
+        } catch (e) {
+            localStorage.removeItem('tron_session');
+        }
+    }
+    return false;
+}
+
+
+
