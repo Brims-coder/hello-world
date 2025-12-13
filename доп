@@ -1,0 +1,434 @@
+<!-- ЭКРАН АУТЕНТИФИКАЦИИ -->
+<div id="auth-screen">
+    <div class="auth-container">
+        <div class="auth-title">
+            <div class="glitch">TRON AI v2.0</div>
+            <div style="font-size: 14px; color: var(--secondary); margin-top: 5px;">
+                Локальный искусственный интеллект
+            </div>
+        </div>
+        
+        <div class="auth-matrix">
+            <div class="matrix-line"></div>
+            <div class="matrix-line"></div>
+            <div class="matrix-line"></div>
+        </div>
+        
+        <div class="auth-password-container">
+            <div class="password-label">
+                <span class="blink">■</span> ВВЕДИТЕ МАСТЕР-ПАРОЛЬ
+            </div>
+            
+            <div class="password-input-wrapper">
+                <input type="password" 
+                       id="auth-password" 
+                       class="auth-input"
+                       placeholder=""
+                       autocomplete="off"
+                       autofocus
+                       maxlength="20">
+                <div class="password-mask" id="password-mask"></div>
+            </div>
+            
+            <div class="password-hint">
+                [Для входа нажмите ENTER]
+            </div>
+        </div>
+        
+        <div class="auth-status" id="auth-status">
+            <span class="status-indicator blink">■</span>
+            <span>ОЖИДАНИЕ ВВОДА...</span>
+        </div>
+        
+        <div class="auth-footer">
+            <div class="security-info">
+                <div>🔒 AES-256 ШИФРОВАНИЕ</div>
+                <div>💾 ЛОКАЛЬНОЕ ХРАНЕНИЕ</div>
+                <div>🚫 НЕТ ДОСТУПА В ИНТЕРНЕТ</div>
+            </div>
+        </div>
+        
+        <div id="auth-error" class="auth-error"></div>
+    </div>
+</div>
+
+
+
+
+/* СТИЛИ АУТЕНТИФИКАЦИИ */
+.auth-container {
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    background: rgba(0, 20, 0, 0.9);
+    border: 2px solid var(--primary);
+    border-radius: 5px;
+    box-shadow: 0 0 40px rgba(0, 255, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--primary);
+    font-size: 28px;
+    text-shadow: 0 0 15px var(--primary);
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.auth-matrix {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.3;
+    z-index: 0;
+}
+
+.matrix-line {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+    animation: matrixFall 3s linear infinite;
+}
+
+.matrix-line:nth-child(1) {
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.matrix-line:nth-child(2) {
+    left: 50%;
+    animation-delay: 1s;
+}
+
+.matrix-line:nth-child(3) {
+    left: 80%;
+    animation-delay: 2s;
+}
+
+@keyframes matrixFall {
+    0% {
+        top: -100%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+.auth-password-container {
+    position: relative;
+    z-index: 1;
+    margin: 30px 0;
+}
+
+.password-label {
+    color: var(--primary);
+    font-size: 12px;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    border-radius: 3px;
+    outline: none;
+    letter-spacing: 2px;
+    transition: all 0.3s;
+}
+
+.auth-input:focus {
+    box-shadow: 0 0 20px var(--primary);
+    border-color: #00ff00;
+}
+
+.password-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 255, 0, 0.1);
+    pointer-events: none;
+    display: none;
+    border-radius: 3px;
+}
+
+.password-hint {
+    color: var(--secondary);
+    font-size: 11px;
+    margin-top: 8px;
+    text-align: center;
+    opacity: 0.7;
+}
+
+.auth-status {
+    color: var(--primary);
+    font-size: 12px;
+    text-align: center;
+    margin: 20px 0;
+    padding: 10px;
+    background: rgba(0, 255, 0, 0.05);
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    border-radius: 3px;
+}
+
+.status-indicator {
+    color: var(--primary);
+    margin-right: 8px;
+}
+
+.auth-footer {
+    margin-top: 30px;
+    border-top: 1px solid rgba(0, 255, 0, 0.2);
+    padding-top: 20px;
+}
+
+.security-info {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: var(--secondary);
+    font-size: 11px;
+    text-align: center;
+}
+
+.security-info div {
+    padding: 5px 10px;
+    background: rgba(0, 255, 0, 0.1);
+    border-radius: 3px;
+}
+
+/* Эффект неверного пароля */
+.auth-error {
+    color: var(--error);
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+    min-height: 20px;
+    padding: 10px;
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid var(--error);
+    border-radius: 3px;
+    display: none;
+}
+
+/* Анимация отказа в доступе */
+@keyframes accessDenied {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.access-denied {
+    animation: accessDenied 0.5s ease-in-out;
+}
+
+/* Эффект печатания текста */
+.typewriter {
+    overflow: hidden;
+    border-right: 2px solid var(--primary);
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: var(--primary) }
+}
+
+
+
+
+
+// ============================================================================
+// АУТЕНТИФИКАЦИЯ - ОБНОВЛЕННАЯ ВЕРСИЯ
+// ============================================================================
+
+authenticate(password) {
+    // Очищаем предыдущие ошибки
+    this.elements.authError.style.display = 'none';
+    this.elements.authError.textContent = '';
+    
+    // Показываем маску пароля
+    const mask = document.getElementById('password-mask');
+    mask.style.display = 'block';
+    
+    // Обновляем статус
+    const status = document.getElementById('auth-status');
+    status.innerHTML = '<span class="blink">■</span> ПРОВЕРКА ПАРОЛЯ...';
+    
+    // Имитация проверки пароля (безопасная задержка)
+    setTimeout(() => {
+        if (password === this.config.masterPassword) {
+            // Успешная аутентификация
+            this.state.authenticated = true;
+            this.state.sessionStart = Date.now();
+            
+            // Сохраняем сессию
+            localStorage.setItem('tron_session', JSON.stringify({
+                timestamp: this.state.sessionStart,
+                user: this.config.user,
+                authMethod: 'password'
+            }));
+            
+            // Показываем успешный статус
+            status.innerHTML = '<span style="color: #00ff00">✓</span> ДОСТУП РАЗРЕШЕН';
+            status.style.color = '#00ff00';
+            status.style.borderColor = '#00ff00';
+            
+            // Эффект успешного входа
+            mask.style.background = 'rgba(0, 255, 0, 0.3)';
+            
+            // Задержка перед показом терминала
+            setTimeout(() => {
+                mask.style.display = 'none';
+                this.showTerminal();
+                this.printWelcome();
+                this.playSound('login');
+            }, 500);
+            
+            return true;
+        } else {
+            // Неверный пароль
+            mask.style.display = 'none';
+            
+            // Эффект ошибки
+            this.elements.authPassword.classList.add('access-denied');
+            this.elements.authPassword.style.borderColor = 'var(--error)';
+            this.elements.authPassword.style.boxShadow = '0 0 20px var(--error)';
+            
+            // Показываем ошибку
+            this.elements.authError.textContent = '❌ ОШИБКА ДОСТУПА: Неверный пароль';
+            this.elements.authError.style.display = 'block';
+            
+            // Обновляем статус
+            status.innerHTML = '<span style="color: var(--error)">✗</span> ДОСТУП ЗАПРЕЩЕН';
+            status.style.color = 'var(--error)';
+            status.style.borderColor = 'var(--error)';
+            
+            // Сбрасываем инпут
+            setTimeout(() => {
+                this.elements.authPassword.classList.remove('access-denied');
+                this.elements.authPassword.style.borderColor = '';
+                this.elements.authPassword.style.boxShadow = '';
+                this.elements.authPassword.value = '';
+                this.elements.authPassword.focus();
+            }, 1500);
+            
+            this.playSound('error');
+            return false;
+        }
+    }, 800); // Искусственная задержка для имитации проверки
+}
+
+// Обновите метод handleLogin:
+handleLogin() {
+    const password = this.elements.authPassword.value.trim();
+    
+    if (!password) {
+        this.elements.authError.textContent = '⚠️ ВВЕДИТЕ ПАРОЛЬ';
+        this.elements.authError.style.display = 'block';
+        this.elements.authPassword.focus();
+        return;
+    }
+    
+    this.authenticate(password);
+}
+
+// Обновите метод init для обработки Enter в поле пароля:
+init() {
+    this.bindEvents();
+    this.checkSession();
+    this.renderCommandChips();
+    this.detectPlatform();
+    
+    this.elements = {
+        authScreen: document.getElementById('auth-screen'),
+        terminal: document.getElementById('tron-terminal'),
+        authPassword: document.getElementById('auth-password'),
+        authError: document.getElementById('auth-error'),
+        output: document.getElementById('output'),
+        commandInput: document.getElementById('command-input'),
+        sendBtn: document.getElementById('send-btn'),
+        currentDir: document.getElementById('current-dir'),
+        suggestions: document.getElementById('suggestions'),
+        virtualKeyboard: document.getElementById('virtual-keyboard'),
+        showKeyboard: document.getElementById('show-keyboard'),
+        commandsPanel: document.getElementById('commands-panel'),
+        statusText: document.getElementById('status-text')
+    };
+    
+    // Обработка Enter в поле пароля
+    this.elements.authPassword.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.handleLogin();
+        }
+    });
+    
+    // Прячем ошибку при начале ввода
+    this.elements.authPassword.addEventListener('input', () => {
+        this.elements.authError.style.display = 'none';
+    });
+    
+    // Автофокус при загрузке
+    setTimeout(() => {
+        if (!this.state.authenticated) {
+            this.elements.authPassword.focus();
+        }
+    }, 100);
+}
+
+// Обновите метод logout для сброса стилей:
+logout() {
+    this.state.authenticated = false;
+    localStorage.removeItem('tron_session');
+    
+    // Сбрасываем стили аутентификации
+    const status = document.getElementById('auth-status');
+    status.innerHTML = '<span class="blink">■</span> ОЖИДАНИЕ ВВОДА...';
+    status.style.color = '';
+    status.style.borderColor = '';
+    
+    this.elements.authError.style.display = 'none';
+    this.elements.authPassword.value = '';
+    this.elements.authPassword.style.borderColor = '';
+    this.elements.authPassword.style.boxShadow = '';
+    
+    this.elements.terminal.classList.add('hidden');
+    this.elements.authScreen.classList.remove('hidden');
+    this.elements.authPassword.focus();
+    this.playSound('logout');
+}
